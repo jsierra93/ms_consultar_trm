@@ -12,11 +12,14 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 @Configuration
 public class Route {
-    private static final String ROUTE_CONSULT = "/consultartrmhoy";
+    private static final String ROUTE_CONSULT = "/trmhoy";
+    private static final String ROUTE_CONSULT_ID = "/trmfecha/{fecha}";
 
     @Bean
     RouterFunction<ServerResponse> routes(Handler handler) {
-        return route(
-                GET(ROUTE_CONSULT).and(accept(MediaType.APPLICATION_JSON)), handler::consultarTrm);
+        return route(GET(ROUTE_CONSULT).and(accept(MediaType.APPLICATION_JSON)), handler::trmHoy)
+                .andRoute(
+                GET(ROUTE_CONSULT_ID).and(accept(MediaType.APPLICATION_JSON)), handler::trmFecha
+        );
     }
 }

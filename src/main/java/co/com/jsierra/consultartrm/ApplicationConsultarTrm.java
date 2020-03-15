@@ -21,11 +21,11 @@ public class ApplicationConsultarTrm {
     CommandLineRunner init(TrmRepository repository){
         return args -> {
 
-            Flux<Trm> trn = Flux.just(
+            Flux<Trm> trm = Flux.just(
                     Trm.builder().fecha("03/15/2020").valor("3941.920").build()
             ).flatMap(p-> repository.save(p));
 
-            trn.thenMany(repository.findAll())
+            trm.thenMany(repository.findAll())
                     .subscribe(System.out::println);
 
         };
