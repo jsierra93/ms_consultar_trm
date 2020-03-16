@@ -12,12 +12,11 @@ public class TrmClienteApi {
     private final WebClient webClient;
     private static final String API_MIME_TYPE = "application/json";
     private static final String API_BASE_URL = "http://app.docm.co/prod/Dmservices/Utilities.svc/GetTRM";
-    private static final String API_DATOS_ABIERTOS = "https://www.datos.gov.co/resource/32sa-8pi3.json";
     private static final Logger logger = LoggerFactory.getLogger(TrmClienteApi.class);
 
     public TrmClienteApi() {
         this.webClient = WebClient.builder()
-                .baseUrl(API_DATOS_ABIERTOS)
+                .baseUrl(API_BASE_URL)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, API_MIME_TYPE)
                 .build();
     }
@@ -25,11 +24,6 @@ public class TrmClienteApi {
     public Flux<String> getTrmActual() {
         return webClient.get()
                 .uri("/GetTRM")
-                .exchange()
-                .flatMapMany(clientResponse -> clientResponse.bodyToFlux(String.class));
-    }
-    public Flux<String> getTrmHistorico() {
-        return webClient.get()
                 .exchange()
                 .flatMapMany(clientResponse -> clientResponse.bodyToFlux(String.class));
     }

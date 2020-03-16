@@ -3,6 +3,7 @@ package co.com.jsierra.consultartrm.controller;
 import co.com.jsierra.consultartrm.model.Trm;
 import co.com.jsierra.consultartrm.repository.TrmRepository;
 import co.com.jsierra.consultartrm.service.TrmClienteApi;
+import co.com.jsierra.consultartrm.service.WebClientDatosGovApi;
 import com.sun.jna.platform.win32.WinCrypt;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -26,7 +27,7 @@ public class Handler {
 
     TrmRepository trmRepository;
     TrmClienteApi trmClienteApi;
-
+    WebClientDatosGovApi webClientDatosGovApi;
 
     public Mono<ServerResponse> trmHoy(ServerRequest request) {
         LocalDate date = LocalDate.now();
@@ -49,21 +50,22 @@ public class Handler {
     }
 
     public Mono<ServerResponse> obtenerTrmApi(ServerRequest request) {
-        LocalDate date = LocalDate.now();
         Flux<String> trm = trmClienteApi.getTrmActual();
-
-        Flux<Trm> trmActual = trmRepository.findAll()
-                .filter(val -> val.getFecha().equals(date))
-                .retry();
-
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(trm , String.class);
     }
+
+    public Mono<ServerResponse> obtenerTrmDatosAbiertosHoy(ServerRequest request) {
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(webClientDatosGovApi.getTrmActual(), String.class);
+    }
+
     public Mono<ServerResponse> obtenerTrmApiDatosAbiertos(ServerRequest request) {
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(trmClienteApi.getTrmHistorico() , String.class);
+                .body(webClientDatosGovApi.getTrmHistorico() , String.class);
     }
 
 }

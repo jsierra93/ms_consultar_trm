@@ -15,6 +15,7 @@ public class Route {
     private static final String ROUTE_CONSULT = "/trmhoy";
     private static final String ROUTE_CONSULT_TRM_API = "/trmhoyapi";
     private static final String ROUTE_CONSULT_ID = "/trmfecha/{fecha}";
+    private static final String ROUTE_CONSULT_TRM_API_DIA = "/trmdatosgovhoy";
     private static final String ROUTE_CONSULT_TRM_API_HISTORICO = "/trmhistorico";
 
     @Bean
@@ -22,6 +23,7 @@ public class Route {
         return route(GET(ROUTE_CONSULT).and(accept(MediaType.APPLICATION_JSON)), handler::trmHoy)
                 .andRoute(GET(ROUTE_CONSULT_ID).and(accept(MediaType.APPLICATION_JSON)), handler::trmFecha)
                 .andRoute(GET(ROUTE_CONSULT_TRM_API).and(accept(MediaType.APPLICATION_JSON)), handler::obtenerTrmApi)
+                .andRoute(GET(ROUTE_CONSULT_TRM_API_DIA).and(accept(MediaType.APPLICATION_JSON)), handler::obtenerTrmDatosAbiertosHoy)
                 .andRoute(GET(ROUTE_CONSULT_TRM_API_HISTORICO).and(accept(MediaType.APPLICATION_JSON)), handler::obtenerTrmApiDatosAbiertos);
     }
 }
