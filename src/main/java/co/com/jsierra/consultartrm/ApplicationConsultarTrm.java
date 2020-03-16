@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import reactor.core.publisher.Flux;
 
 import java.text.DateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 
 @SpringBootApplication
@@ -22,7 +23,8 @@ public class ApplicationConsultarTrm {
         return args -> {
 
             Flux<Trm> trm = Flux.just(
-                    Trm.builder().fecha("03/15/2020").valor("3941.920").build()
+                    Trm.builder().fecha(LocalDate.parse("2020-03-14")).valor("3941.920").build(),
+                    Trm.builder().fecha(LocalDate.parse("2020-03-13")).valor("4041.920").build()
             ).flatMap(p-> repository.save(p));
 
             trm.thenMany(repository.findAll())

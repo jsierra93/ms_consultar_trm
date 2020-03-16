@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+
 @Document
 @Data
 @AllArgsConstructor
@@ -17,5 +19,5 @@ public class Trm {
     @Id
     private String id;
     private String valor;
-    private String fecha;
+    private LocalDate fecha;
 }
