@@ -19,6 +19,7 @@ public class WebClientDatosGovApi {
     private static final Logger logger = LoggerFactory.getLogger(WebClientDatosGovApi.class);
 
     /*
+    respuesta de la API
    {
        "valor": "3941.92",
        "unidad": "COP",
