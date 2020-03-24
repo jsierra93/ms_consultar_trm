@@ -16,7 +16,7 @@ public class ApplicationConsultarTrm {
         SpringApplication.run(ApplicationConsultarTrm.class, args);
     }
 
-    @Bean
+  /*  @Bean
     CommandLineRunner init(TrmRepository repository) {
         return args -> {
 
@@ -29,5 +29,5 @@ public class ApplicationConsultarTrm {
                     .subscribe(System.out::println);
 
         };
-    }
+    }*/
 }

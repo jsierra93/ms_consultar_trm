@@ -35,7 +35,7 @@ dependencies {
     implementation('org.springframework:spring-context')
 
     implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
-    implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
+    //implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
 
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation('io.projectreactor:reactor-test')
@@ -49,5 +49,8 @@ dependencies {
     testAnnotationProcessor('org.projectlombok:lombok')
 
     compileOnly("org.springframework.boot:spring-boot-devtools")
+
+    implementation 'com.google.code.gson:gson:2.8.5'
+
 
 }
