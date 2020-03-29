@@ -19,13 +19,25 @@ public class Route {
     private static final String ROUTE_CONSULT_TRM_API_HISTORICO = "/trmhistorico";
     private static final String ROUTE_CONSULT_LOCAL = "/trmlocal";
 
+    private static final String ROUTE_CONSULT_TODAY_BD = "/consult/today";
+    private static final String ROUTE_CONSULT_HISTORY_BD = "/consult/history";
+    private static final String ROUTE_RESET_HISTORY_BD = "/reset/history";
+    private static final String ROUTE_SYNC_HISTORY_BD_API = "/sync/history";
+    private static final String ROUTE_LOAD_MANUAL_BD = "/load/manual";
+
     @Bean
-    RouterFunction<ServerResponse> routes(Handler handler) {
+    RouterFunction<ServerResponse> routesDemo(Handler handler) {
         return route(GET(ROUTE_CONSULT).and(accept(MediaType.APPLICATION_JSON)), handler::trmHoy)
                 .andRoute(GET(ROUTE_CONSULT_LOCAL).and(accept(MediaType.APPLICATION_JSON)), handler::consultaBdLocal)
                 .andRoute(GET(ROUTE_CONSULT_ID).and(accept(MediaType.APPLICATION_JSON)), handler::trmFecha)
                 .andRoute(GET(ROUTE_CONSULT_TRM_API).and(accept(MediaType.APPLICATION_JSON)), handler::obtenerTrmApi)
                 .andRoute(GET(ROUTE_CONSULT_TRM_API_DIA).and(accept(MediaType.APPLICATION_JSON)), handler::obtenerTrmDatosAbiertosHoy)
                 .andRoute(GET(ROUTE_CONSULT_TRM_API_HISTORICO).and(accept(MediaType.APPLICATION_JSON)), handler::obtenerTrmApiDatosAbiertos);
+    }
+
+    @Bean
+    RouterFunction<ServerResponse> routesApi(HandlerApi handlerApi) {
+        return route(GET(ROUTE_CONSULT_TODAY_BD).and(accept(MediaType.APPLICATION_JSON)), handlerApi::consultToday)
+                .andRoute(GET(ROUTE_CONSULT_HISTORY_BD).and(accept(MediaType.APPLICATION_JSON)), handlerApi::consultHistory);
     }
 }
