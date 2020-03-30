@@ -4,9 +4,7 @@ import co.com.jsierra.consultartrm.model.TrmLocalModel;
 import co.com.jsierra.consultartrm.repository.TrmLocalRepository;
 import co.com.jsierra.consultartrm.service.WebClientDatosGovApi;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -32,8 +30,8 @@ public class Handler {
     }
 
     public Mono<ServerResponse> consultToday(ServerRequest request) {
-        // LocalDate dayToday = LocalDate.of(2020, 03, 25); // para simular fechas
-        LocalDate dayToday = LocalDate.now();
+        LocalDate dayToday = LocalDate.of(2020, 03, 04); // para simular fechas
+        //LocalDate dayToday = LocalDate.now();
         LocalDate daySince = dayToday;
         LocalDate dayUntil = dayToday;
 
@@ -43,38 +41,24 @@ public class Handler {
             dayUntil = nextWorkingDay(dayToday);
         }
 
-
-        Flux<TrmLocalModel> data = trmLocalRepository.findBySinceAndUntil(daySince.toString(), dayUntil.toString())
+        Flux<TrmLocalModel> data2 = trmLocalRepository.findBySinceAndUntil(daySince.toString(), dayUntil.toString())
                 .switchIfEmpty(
-                        trmLocalRepository.findAll()
+                        webClientDatosGovApi.getTrmDay(daySince, dayUntil)
+                                .flatMap(val -> {
+                                    System.out.println(val);
+                                    return trmLocalRepository.save(TrmLocalModel.builder().code(val.getUnidad()).value(val.getValor()).since(val.getVigenciadesde().toLocalDateTime().toLocalDate().plusDays(1).toString()).until(val.getVigenciahasta().toLocalDateTime().toLocalDate().plusDays(1).toString()).build());
+                                })
                 );
-
-        Flux<TrmLocalModel> response = webClientDatosGovApi.getTrmDay(daySince, dayUntil)
-                .map(
-                        x -> {
-                            TrmLocalModel localModel = TrmLocalModel.builder().code(x.getUnidad()).value(x.getValor()).since(x.getVigenciadesde().toLocalDateTime().toLocalDate()).until(x.getVigenciahasta().toLocalDateTime().toLocalDate()).build();
-                            return localModel;
-                        }
-                ).flatMap(
-                        trmLocalRepository::save
-                );
-
-        response.subscribe( val -> {
-            System.out.println("TRM Obtenida :" +val.getValue());
-        });
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(data, TrmLocalModel.class)
-                .switchIfEmpty(
-                        ServerResponse.notFound().build()
-                );
+                .body(data2, TrmLocalModel.class);
     }
 
     public Mono<ServerResponse> resetDataBase(ServerRequest request) {
         Mono<Long> count = trmLocalRepository.findAll().count();
         count.subscribe(
-                cant -> System.out.println("Registros eliminados:" +cant)
+                cant -> System.out.println("Registros eliminados:" + cant)
         );
         Mono<Void> delete = trmLocalRepository.deleteAll();
         return ServerResponse.ok()
