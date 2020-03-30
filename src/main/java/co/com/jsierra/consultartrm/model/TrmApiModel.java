@@ -4,20 +4,21 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document("Historico")
+import java.sql.Timestamp;
+
+@Document
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TrmLocal {
+public class TrmApiModel {
 
-    @Id
-    private String id;
     private String valor;
     private String unidad;
-    private String vigenciadesde;
-    private String vigenciahasta;
+    private Timestamp vigenciadesde;
+    private Timestamp vigenciahasta;
 }
+
+

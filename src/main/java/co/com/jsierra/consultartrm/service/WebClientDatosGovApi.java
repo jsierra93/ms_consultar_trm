@@ -1,5 +1,6 @@
 package co.com.jsierra.consultartrm.service;
 
+import co.com.jsierra.consultartrm.model.TrmApiModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -48,5 +49,14 @@ public class WebClientDatosGovApi {
         return webClient.get()
                 .exchange()
                 .flatMapMany(clientResponse -> clientResponse.bodyToFlux(String.class));
+    }
+
+    public Flux<TrmApiModel> getTrmDay(LocalDate since, LocalDate until) {
+        String parametros = "?vigenciadesde="+LocalDateTime.parse(since+"T00:00:00")+":00.000";
+        parametros += "&vigenciahasta="+LocalDateTime.parse(until+"T00:00:00")+":00.000";
+        return webClient.get()
+                .uri(parametros)
+                .retrieve()
+                .bodyToFlux(TrmApiModel.class);
     }
 }

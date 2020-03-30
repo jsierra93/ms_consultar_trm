@@ -1,6 +1,8 @@
 spring:
   application:
     name: consultar-trm-colombia
+  thymeleaf:
+    cache: true
   data:
     mongodb:
       #authentication-database: admin

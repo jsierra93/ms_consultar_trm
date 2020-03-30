@@ -1,13 +1,12 @@
 package co.com.jsierra.consultartrm.controller;
 
-import co.com.jsierra.consultartrm.model.Trm;
-import co.com.jsierra.consultartrm.model.TrmLocal;
+import co.com.jsierra.consultartrm.model.TrmLocalModel;
 import co.com.jsierra.consultartrm.repository.TrmLocalRepository;
-import co.com.jsierra.consultartrm.repository.TrmRepository;
-import co.com.jsierra.consultartrm.service.TrmClienteApi;
 import co.com.jsierra.consultartrm.service.WebClientDatosGovApi;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -16,58 +15,83 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
+import static co.com.jsierra.consultartrm.utilities.UtilitiesManager.*;
+
 @AllArgsConstructor
 @Component
 public class Handler {
 
-    TrmRepository trmRepository;
     TrmLocalRepository trmLocalRepository;
-    TrmClienteApi trmClienteApi;
     WebClientDatosGovApi webClientDatosGovApi;
 
-    public Mono<ServerResponse> trmHoy(ServerRequest request) {
-        LocalDate date = LocalDate.now();
-        Trm prueba = Trm.builder().id("5e6ea031118f652d7a4b275").fecha(date).valor("3000.00").build();
-        Flux<Trm> trmActual = trmRepository.findAll()
-                .filter(val -> val.getFecha().equals(date))
+    public Mono<ServerResponse> consultHistory(ServerRequest request) {
+        Flux<TrmLocalModel> trmActual = trmLocalRepository.findAll();
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(trmActual, TrmLocalModel.class);
+    }
+
+    public Mono<ServerResponse> consultToday(ServerRequest request) {
+        // LocalDate dayToday = LocalDate.of(2020, 03, 25); // para simular fechas
+        LocalDate dayToday = LocalDate.now();
+        LocalDate daySince = dayToday;
+        LocalDate dayUntil = dayToday;
+
+        boolean workingDay = workingDay(dayToday);
+        if (!workingDay) {
+            daySince = lastWorkingDay(dayToday);
+            dayUntil = nextWorkingDay(dayToday);
+        }
+
+
+        Flux<TrmLocalModel> data = trmLocalRepository.findBySinceAndUntil(daySince.toString(), dayUntil.toString())
                 .switchIfEmpty(
-                        Flux.just(prueba)
+                        trmLocalRepository.findAll()
                 );
+
+        Flux<TrmLocalModel> response = webClientDatosGovApi.getTrmDay(daySince, dayUntil)
+                .map(
+                        x -> {
+                            TrmLocalModel localModel = TrmLocalModel.builder().code(x.getUnidad()).value(x.getValor()).since(x.getVigenciadesde().toLocalDateTime().toLocalDate()).until(x.getVigenciahasta().toLocalDateTime().toLocalDate()).build();
+                            return localModel;
+                        }
+                ).flatMap(
+                        trmLocalRepository::save
+                );
+
+        response.subscribe( val -> {
+            System.out.println("TRM Obtenida :" +val.getValue());
+        });
+
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(trmActual, Trm.class);
+                .body(data, TrmLocalModel.class)
+                .switchIfEmpty(
+                        ServerResponse.notFound().build()
+                );
     }
 
-    public Mono<ServerResponse> trmFecha(ServerRequest request) {
-        Mono<Trm> trmActual = trmRepository.findById(request.pathVariable("id"));
+    public Mono<ServerResponse> resetDataBase(ServerRequest request) {
+        Mono<Long> count = trmLocalRepository.findAll().count();
+        count.subscribe(
+                cant -> System.out.println("Registros eliminados:" +cant)
+        );
+        Mono<Void> delete = trmLocalRepository.deleteAll();
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(trmActual, Trm.class);
+                .body(delete, Void.class);
     }
 
-    public Mono<ServerResponse> obtenerTrmApi(ServerRequest request) {
-        Flux<String> trm = trmClienteApi.getTrmActual();
+    public Mono<ServerResponse> syncDataBaseFromApi(ServerRequest request) {
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(trm, String.class);
+                .body(Mono.just("BD Sincronizada con API"), String.class);
     }
 
-    public Mono<ServerResponse> obtenerTrmDatosAbiertosHoy(ServerRequest request) {
+    public Mono<ServerResponse> loadDataManual(ServerRequest request) {
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(webClientDatosGovApi.getTrmActual(), String.class);
+                .body(Mono.just("Se han cargado N registros"), String.class);
     }
 
-    public Mono<ServerResponse> obtenerTrmApiDatosAbiertos(ServerRequest request) {
-        return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(webClientDatosGovApi.getTrmHistorico(), String.class);
-    }
-
-    public Mono<ServerResponse> consultaBdLocal(ServerRequest request) {
-        Flux<TrmLocal> local = trmLocalRepository.findAll();
-        return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(local, TrmLocal.class);
-    }
 }

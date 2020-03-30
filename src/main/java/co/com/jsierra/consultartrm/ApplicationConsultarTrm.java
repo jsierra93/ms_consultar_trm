@@ -1,14 +1,7 @@
 package co.com.jsierra.consultartrm;
 
-import co.com.jsierra.consultartrm.model.Trm;
-import co.com.jsierra.consultartrm.repository.TrmRepository;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import reactor.core.publisher.Flux;
-
-import java.time.LocalDate;
 
 @SpringBootApplication
 public class ApplicationConsultarTrm {

@@ -9,15 +9,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
-@Document
+@Document("Historico")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Trm {
+public class TrmLocalModel {
 
     @Id
     private String id;
-    private String valor;
-    private LocalDate fecha;
+    private String value;
+    private String code;
+    private LocalDate since;
+    private LocalDate until;
 }
