@@ -30,22 +30,22 @@ public class Handler {
     }
 
     public Mono<ServerResponse> consultToday(ServerRequest request) {
-        LocalDate dayToday = LocalDate.of(2020, 03, 04); // para simular fechas
-        //LocalDate dayToday = LocalDate.now();
+        //  LocalDate dayToday = LocalDate.of(2020, 03, 04); // para simular fechas
+        LocalDate dayToday = LocalDate.now();
         LocalDate daySince = dayToday;
         LocalDate dayUntil = dayToday;
 
         boolean workingDay = workingDay(dayToday);
+
         if (!workingDay) {
             daySince = lastWorkingDay(dayToday);
             dayUntil = nextWorkingDay(dayToday);
         }
 
-        Flux<TrmLocalModel> data2 = trmLocalRepository.findBySinceAndUntil(daySince.toString(), dayUntil.toString())
+        Flux<TrmLocalModel> data2 = trmLocalRepository.findBySinceOrUntil(daySince.toString(), dayUntil.toString())
                 .switchIfEmpty(
                         webClientDatosGovApi.getTrmDay(daySince, dayUntil)
                                 .flatMap(val -> {
-                                    System.out.println(val);
                                     return trmLocalRepository.save(TrmLocalModel.builder().code(val.getUnidad()).value(val.getValor()).since(val.getVigenciadesde().toLocalDateTime().toLocalDate().plusDays(1).toString()).until(val.getVigenciahasta().toLocalDateTime().toLocalDate().plusDays(1).toString()).build());
                                 })
                 );

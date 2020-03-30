@@ -16,4 +16,6 @@ public interface TrmLocalRepository extends ReactiveMongoRepository<TrmLocalMode
 
     Flux<TrmLocalModel> findBySinceAndUntil(String since, String until);
 
+    Flux<TrmLocalModel> findBySinceOrUntil(String since, String until);
+
 }

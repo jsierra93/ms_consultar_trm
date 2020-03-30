@@ -10,7 +10,7 @@ public class UtilitiesManager {
      **/
     public static boolean workingDay(LocalDate date){
         boolean isWorking = true;
-        if ( ("SATURDAY").equalsIgnoreCase(date.getDayOfWeek().toString()) || ("SUNDAY").equalsIgnoreCase(date.getDayOfWeek().toString())){
+        if ( ("SATURDAY").equalsIgnoreCase(date.getDayOfWeek().toString()) || ("SUNDAY").equalsIgnoreCase(date.getDayOfWeek().toString())|| ("MONDAY").equalsIgnoreCase(date.getDayOfWeek().toString())){
             isWorking = false;
         }
     return isWorking;
@@ -20,14 +20,17 @@ public class UtilitiesManager {
 
         if (("SUNDAY").equalsIgnoreCase(day.getDayOfWeek().toString())){
             day = day.minusDays(1);
-        }
+        }else
+            if (("MONDAY").equalsIgnoreCase(day.getDayOfWeek().toString())){
+                day = day.minusDays(2);
+            }
         return day;
     }
     public static LocalDate nextWorkingDay(LocalDate day){
-
         if (("SATURDAY").equalsIgnoreCase(day.getDayOfWeek().toString())){
             day = day.plusDays(2);
-        } else {
+        } else
+            if (("SUNDAY").equalsIgnoreCase(day.getDayOfWeek().toString())){
             day = day.plusDays(1);
         }
         return day;
