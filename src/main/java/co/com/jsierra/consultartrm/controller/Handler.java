@@ -1,6 +1,5 @@
 package co.com.jsierra.consultartrm.controller;
 
-import co.com.jsierra.consultartrm.model.TrmApiModel;
 import co.com.jsierra.consultartrm.model.TrmLocalModel;
 import co.com.jsierra.consultartrm.repository.TrmLocalRepository;
 import co.com.jsierra.consultartrm.service.WebClientDatosGovApi;
@@ -15,10 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static co.com.jsierra.consultartrm.utilities.UtilitiesManager.*;
 
@@ -31,7 +27,11 @@ public class Handler {
     WebClientDatosGovApi webClientDatosGovApi;
 
     public Mono<ServerResponse> consultHistory(ServerRequest request) {
-        Flux<TrmLocalModel> trmActual = trmLocalRepository.findAll();
+        Flux<TrmLocalModel> trmActual = trmLocalRepository.findAll()
+                .sort((trm1, trm2)-> trm2.getSince().compareTo(trm1.getSince()))
+                .distinct(TrmLocalModel::getSince)
+                .distinct(TrmLocalModel::getUntil);
+
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(trmActual, TrmLocalModel.class);
@@ -87,9 +87,9 @@ public class Handler {
                 );
 
         dataFromApi.count()
-        .subscribe(
-                x -> System.out.println("Cantidad de registros: "+x)
-        );
+                .subscribe(
+                        x -> System.out.println("Cantidad de registros: " + x)
+                );
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -100,5 +100,20 @@ public class Handler {
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just("Se han cargado N registros"), String.class);
+    }
+
+    public Mono<ServerResponse> deleteDataRepeat(ServerRequest request){
+        Flux<TrmLocalModel> dataFilter = trmLocalRepository.findAll()
+              .sort((trm1, trm2)-> trm2.getSince().compareTo(trm1.getSince()))
+                .distinct(TrmLocalModel::getSince);
+
+
+        // reduce((trm1, trm2) -> trm1.getSince().compareTo(trm2.getSince())>0 ? trm1:trm2);
+
+        dataFilter.subscribe(System.out::println);
+
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(dataFilter, TrmLocalModel.class);
     }
 }
