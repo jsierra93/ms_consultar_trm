@@ -45,10 +45,10 @@ public class WebClientDatosGovApi {
                 .flatMapMany(clientResponse -> clientResponse.bodyToFlux(String.class));
     }
 
-    public Flux<String> getTrmHistorico() {
+    public Flux<TrmApiModel> getTrmHistorico() {
         return webClient.get()
                 .exchange()
-                .flatMapMany(clientResponse -> clientResponse.bodyToFlux(String.class));
+                .flatMapMany(clientResponse -> clientResponse.bodyToFlux(TrmApiModel.class));
     }
 
     public Flux<TrmApiModel> getTrmDay(LocalDate since, LocalDate until) {

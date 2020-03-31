@@ -1,9 +1,12 @@
 package co.com.jsierra.consultartrm.controller;
 
+import co.com.jsierra.consultartrm.model.TrmApiModel;
 import co.com.jsierra.consultartrm.model.TrmLocalModel;
 import co.com.jsierra.consultartrm.repository.TrmLocalRepository;
 import co.com.jsierra.consultartrm.service.WebClientDatosGovApi;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -12,12 +15,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static co.com.jsierra.consultartrm.utilities.UtilitiesManager.*;
 
 @AllArgsConstructor
 @Component
 public class Handler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
     TrmLocalRepository trmLocalRepository;
     WebClientDatosGovApi webClientDatosGovApi;
@@ -42,7 +49,7 @@ public class Handler {
             dayUntil = nextWorkingDay(dayToday);
         }
 
-        Flux<TrmLocalModel> data2 = trmLocalRepository.findBySinceOrUntil(daySince.toString(), dayUntil.toString())
+        Flux<TrmLocalModel> data = trmLocalRepository.findBySinceOrUntil(daySince.toString(), dayUntil.toString())
                 .switchIfEmpty(
                         webClientDatosGovApi.getTrmDay(daySince, dayUntil)
                                 .flatMap(val -> {
@@ -52,7 +59,7 @@ public class Handler {
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(data2, TrmLocalModel.class);
+                .body(data, TrmLocalModel.class);
     }
 
     public Mono<ServerResponse> resetDataBase(ServerRequest request) {
@@ -67,9 +74,24 @@ public class Handler {
     }
 
     public Mono<ServerResponse> syncDataBaseFromApi(ServerRequest request) {
+        /**
+         * Pendiente de eliminar u omitir fechas repetidas
+         */
+        Flux<TrmLocalModel> trmActual = trmLocalRepository.findAll();
+
+        Flux<TrmLocalModel> dataFromApi = webClientDatosGovApi.getTrmHistorico()
+                .flatMap(
+                        trmDay -> {
+                            return trmLocalRepository.save(TrmLocalModel.builder().code(trmDay.getUnidad()).value(trmDay.getValor()).since(trmDay.getVigenciadesde().toLocalDateTime().toLocalDate().plusDays(1).toString()).until(trmDay.getVigenciahasta().toLocalDateTime().toLocalDate().plusDays(1).toString()).build());
+                        }
+                );
+
+        dataFromApi.subscribe(
+                val -> System.out.println(val)  //LOGGER.info(val.toString())
+        );
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just("BD Sincronizada con API"), String.class);
+                .body(dataFromApi, TrmLocalModel.class);
     }
 
     public Mono<ServerResponse> loadDataManual(ServerRequest request) {
