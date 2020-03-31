@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static co.com.jsierra.consultartrm.utilities.UtilitiesManager.*;
 
@@ -77,7 +78,6 @@ public class Handler {
         /**
          * Pendiente de eliminar u omitir fechas repetidas
          */
-        Flux<TrmLocalModel> trmActual = trmLocalRepository.findAll();
 
         Flux<TrmLocalModel> dataFromApi = webClientDatosGovApi.getTrmHistorico()
                 .flatMap(
@@ -86,9 +86,11 @@ public class Handler {
                         }
                 );
 
-        dataFromApi.subscribe(
-                val -> System.out.println(val)  //LOGGER.info(val.toString())
+        dataFromApi.count()
+        .subscribe(
+                x -> System.out.println("Cantidad de registros: "+x)
         );
+
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(dataFromApi, TrmLocalModel.class);
@@ -99,5 +101,4 @@ public class Handler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just("Se han cargado N registros"), String.class);
     }
-
 }
