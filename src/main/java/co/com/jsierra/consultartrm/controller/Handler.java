@@ -14,6 +14,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static co.com.jsierra.consultartrm.utilities.UtilitiesManager.*;
 
@@ -34,7 +38,6 @@ public class Handler {
 
     public Mono<ServerResponse> consultToday(ServerRequest request) {
         //  LocalDate dayToday = LocalDate.of(2020, 03, 04); // para simular fechas
-        // Por agregar: Validar festivos en colombia
         LocalDate dayToday = LocalDate.now();
         LocalDate daySince = dayToday;
         LocalDate dayUntil = dayToday;
@@ -54,10 +57,6 @@ public class Handler {
                                 })
                 );
 
-        data.subscribe(
-                val -> System.out.println("/consult/today --- " + val)
-        );
-
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(data, TrmLocalModel.class);
@@ -75,7 +74,10 @@ public class Handler {
     }
 
     public Mono<ServerResponse> syncDataBaseFromApi(ServerRequest request) {
-        resetDataBase(request);
+        /**
+         * Pendiente de eliminar u omitir fechas repetidas
+         */
+
         Flux<TrmLocalModel> dataFromApi = webClientDatosGovApi.getTrmHistorico()
                 .flatMap(
                         trmDay -> {
@@ -83,12 +85,19 @@ public class Handler {
                         }
                 );
 
-        dataFromApi.subscribe(
-                val -> System.out.println("/sync/history --- " + val)
+        dataFromApi.count()
+        .subscribe(
+                x -> System.out.println("Cantidad de registros: "+x)
         );
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(dataFromApi, TrmLocalModel.class);
+    }
+
+    public Mono<ServerResponse> loadDataManual(ServerRequest request) {
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just("Se han cargado N registros"), String.class);
     }
 }

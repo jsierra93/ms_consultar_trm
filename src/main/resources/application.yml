@@ -8,9 +8,9 @@ spring:
       #authentication-database: admin
       #username: root
       #password: root
-      #database: TrmColombia
-      #port: 27017
-      #host: localhost
-      uri: mongodb://localhost:27017/TrmColombia
+      database: TrmColombia
+      port: 27017
+      host: mongo
+      #uri: mongodb://localhost:27017/TrmColombia
 server:
   port: 8081
