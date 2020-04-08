@@ -14,7 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.stream.Collectors;
 
 import static co.com.jsierra.consultartrm.utilities.UtilitiesManager.*;
 
@@ -28,7 +27,7 @@ public class Handler {
 
     public Mono<ServerResponse> consultHistory(ServerRequest request) {
         Flux<TrmLocalModel> trmActual = trmLocalRepository.findAll()
-                .sort((trm1, trm2)-> trm2.getSince().compareTo(trm1.getSince()))
+                .sort((trm1, trm2) -> trm2.getSince().compareTo(trm1.getSince()))
                 .distinct(TrmLocalModel::getSince)
                 .distinct(TrmLocalModel::getUntil);
 
@@ -39,6 +38,7 @@ public class Handler {
 
     public Mono<ServerResponse> consultToday(ServerRequest request) {
         //  LocalDate dayToday = LocalDate.of(2020, 03, 04); // para simular fechas
+        // Por agregar: Validar festivos en colombia
         LocalDate dayToday = LocalDate.now();
         LocalDate daySince = dayToday;
         LocalDate dayUntil = dayToday;
@@ -58,6 +58,10 @@ public class Handler {
                                 })
                 );
 
+        data.subscribe(
+                val -> System.out.println("/consult/today --- " + val)
+        );
+
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(data, TrmLocalModel.class);
@@ -75,10 +79,7 @@ public class Handler {
     }
 
     public Mono<ServerResponse> syncDataBaseFromApi(ServerRequest request) {
-        /**
-         * Pendiente de eliminar u omitir fechas repetidas
-         */
-
+        resetDataBase(request);
         Flux<TrmLocalModel> dataFromApi = webClientDatosGovApi.getTrmHistorico()
                 .flatMap(
                         trmDay -> {
@@ -86,31 +87,23 @@ public class Handler {
                         }
                 );
 
-        dataFromApi.count()
-                .subscribe(
-                        x -> System.out.println("Cantidad de registros: " + x)
-                );
+        dataFromApi.subscribe(
+                val -> System.out.println("/sync/history --- " + val)
+        );
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(dataFromApi, TrmLocalModel.class);
     }
 
-    public Mono<ServerResponse> loadDataManual(ServerRequest request) {
-        return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just("Se han cargado N registros"), String.class);
-    }
-
-    public Mono<ServerResponse> deleteDataRepeat(ServerRequest request){
+    public Mono<ServerResponse> deleteDataRepeat(ServerRequest request) {
         Flux<TrmLocalModel> dataFilter = trmLocalRepository.findAll()
-              .sort((trm1, trm2)-> trm2.getSince().compareTo(trm1.getSince()))
+                .sort((trm1, trm2) -> trm2.getSince().compareTo(trm1.getSince()))
                 .distinct(TrmLocalModel::getSince);
 
-
-        // reduce((trm1, trm2) -> trm1.getSince().compareTo(trm2.getSince())>0 ? trm1:trm2);
-
-        dataFilter.subscribe(System.out::println);
+        dataFilter.subscribe(
+                x -> System.out.println("/delete/repeat --- " + x)
+        );
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
