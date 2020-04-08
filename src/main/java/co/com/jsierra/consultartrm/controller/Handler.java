@@ -1,6 +1,5 @@
 package co.com.jsierra.consultartrm.controller;
 
-import co.com.jsierra.consultartrm.model.TrmApiModel;
 import co.com.jsierra.consultartrm.model.TrmLocalModel;
 import co.com.jsierra.consultartrm.repository.TrmLocalRepository;
 import co.com.jsierra.consultartrm.service.WebClientDatosGovApi;
@@ -15,9 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import static co.com.jsierra.consultartrm.utilities.UtilitiesManager.*;
 
@@ -38,6 +34,7 @@ public class Handler {
 
     public Mono<ServerResponse> consultToday(ServerRequest request) {
         //  LocalDate dayToday = LocalDate.of(2020, 03, 04); // para simular fechas
+        // Por agregar: Validar festivos en colombia
         LocalDate dayToday = LocalDate.now();
         LocalDate daySince = dayToday;
         LocalDate dayUntil = dayToday;
@@ -57,6 +54,10 @@ public class Handler {
                                 })
                 );
 
+        data.subscribe(
+                val -> System.out.println("/consult/today --- " + val)
+        );
+
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(data, TrmLocalModel.class);
@@ -74,11 +75,7 @@ public class Handler {
     }
 
     public Mono<ServerResponse> syncDataBaseFromApi(ServerRequest request) {
-        /**
-         * Pendiente de eliminar u omitir fechas repetidas
-         */
-        Flux<TrmLocalModel> trmActual = trmLocalRepository.findAll();
-
+        resetDataBase(request);
         Flux<TrmLocalModel> dataFromApi = webClientDatosGovApi.getTrmHistorico()
                 .flatMap(
                         trmDay -> {
@@ -87,17 +84,11 @@ public class Handler {
                 );
 
         dataFromApi.subscribe(
-                val -> System.out.println(val)  //LOGGER.info(val.toString())
+                val -> System.out.println("/sync/history --- " + val)
         );
+
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(dataFromApi, TrmLocalModel.class);
     }
-
-    public Mono<ServerResponse> loadDataManual(ServerRequest request) {
-        return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just("Se han cargado N registros"), String.class);
-    }
-
 }

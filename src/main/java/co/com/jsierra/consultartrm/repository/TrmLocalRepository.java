@@ -5,7 +5,9 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Flux;
 
 public interface TrmLocalRepository extends ReactiveMongoRepository<TrmLocalModel, String> {
-
+/*
+Se definen metodos de busqueda para futuros usos
+ */
     Flux<TrmLocalModel> findByValue(String value);
 
     Flux<TrmLocalModel> findByCode(String code);
