@@ -10,7 +10,7 @@ spring:
       #password: root
       database: TrmColombia
       port: 27017
-      #host: mongo (Activar para usar mongo-docker)
+      #host: mongo  #(Activar para usar mongo-docker)
       host: localhost
       #uri: mongodb://localhost:27017/TrmColombia
 server:

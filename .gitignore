@@ -32,4 +32,4 @@ build
 !build/libs/ms-consulta-trm-0.1.0.jar
 
 #Volumen de mongodb Docker
-
+data
