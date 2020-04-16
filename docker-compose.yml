@@ -1,3 +1,6 @@
+# Para usar dockerfile es necesario modificar application.yml
+# para realizar la conexion a MongoDb desplegado en Docker
+
 mongo:
   image: "mongo"
   restart: always

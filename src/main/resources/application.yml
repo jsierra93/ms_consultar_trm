@@ -5,13 +5,12 @@ spring:
     cache: true
   data:
     mongodb:
-      #authentication-database: admin
-      #username: root
-      #password: root
-      database: TrmColombia
-      port: 27017
+      #authentication-database: username
+      #username: userdev
+      #password: userdev123
+      #database: trmcolombia
+      #port: 62097
       #host: mongo  #(Activar para usar mongo-docker)
-      host: localhost
-      #uri: mongodb://localhost:27017/TrmColombia
+      uri: mongodb://userdev:userdev123@ds062097.mlab.com:62097/trmcolombia?retryWrites=false
 server:
   port: 8081

@@ -44,5 +44,22 @@ Eliminar datos Repetidos
  http://localhost:8081/delete/repeat
  ```
 
+### Docker
+
+Construcción de imagen
+ ```shell
+ docker build -t ms-trm-colombia:latest .
+ ```
+
+Ejecutar contenedor con la imagen
+ ```shell
+docker run -p 8081:8081 -it --name contenedor-trm -d ms-trm-colombia:latest
+ ```
+
+Eliminar contenedor
+ ```shell
+ docker rm ms-trm-colombia:latest
+ ```
+
 ### That's all
 Hope you enjoy it.

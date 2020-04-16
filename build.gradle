@@ -35,7 +35,7 @@ dependencies {
     implementation('org.springframework:spring-context')
 
     implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
-    implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
+    //implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo') Mongo Embebido
 
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation('io.projectreactor:reactor-test')
